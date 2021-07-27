@@ -1,4 +1,9 @@
 from decimal import Decimal
+from collections import namedtuple
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+import seaborn as sns
 from classes10.account import Account
 from classes10.timewithproperties import Time
 from classes10.private import PrivateClass
@@ -6,12 +11,188 @@ from classes10.deck import DeckOfCards
 from classes10.commissionemployee import CommissionEmployee
 from classes10.salariedcommissionemployee import SalariedCommissionEmployee
 from classes10.complexnumber import Complex
+from classes10.carddataclass import Card
+
+
+# ----------------------------------------------------
+# Time Series
+
+# Sources
+#
+# https://www.data.gov/
+#
+# weather-related time series
+# https://www.ncdc.noaa.gov/cag/
+#
+# climat-related time series
+# https://psl.noaa.gov/data/timeseries/
+# 
+# financial-related time series
+# https://www.quandl.com/search
+#
+# University of California Irvine (UCI)
+# https://archive.ics.uci.edu/ml/datasets.php
+# 
+# economic time series
+# http://www.inforum.umd.edu/econdata/econdata.html
+#
+# ----------------------------------------------------
+
+c = lambda f: 5/9 * (f-32)
+temps = [(f, c(f)) for f in range(0,101,10)]
+
+temps_df = pd.DataFrame(temps, columns=['Fahrenheit', 'Celsius'])
+
+axes = temps_df.plot(x='Fahrenheit', y='Celsius', style='.-')
+
+y_label = axes.set_ylabel('Celsius')
+
+# plt.show()
+
+
+nyc = pd.read_csv('./classes10/ave_hi_nyc_jan_1895-2018.csv')
+
+print(nyc.head())
+#      Date  Value  Anomaly
+# 0  189501   34.2     -3.2
+# 1  189601   34.7     -2.7
+# 2  189701   35.5     -1.9
+# 3  189801   39.6      2.2
+# 4  189901   36.4     -1.0
+
+print(nyc.tail())
+#        Date  Value  Anomaly
+# 119  201401   35.5     -1.9
+# 120  201501   36.1     -1.3
+# 121  201601   40.8      3.4
+# 122  201701   42.8      5.4
+# 123  201801   38.7      1.3
+
+nyc.columns=['Date', 'Temperature', 'Anomaly']
+print(nyc.head(3))
+#      Date  Temperature  Anomaly
+# 0  189501         34.2     -3.2
+# 1  189601         34.7     -2.7
+# 2  189701         35.5     -1.9
+
+print(nyc.Date.dtype)
+# int64
+
+nyc.Date = nyc.Date.floordiv(100)
+print(nyc.head(3))
+#    Date  Temperature  Anomaly
+# 0  1895         34.2     -3.2
+# 1  1896         34.7     -2.7
+# 2  1897         35.5     -1.9
+
+pd.set_option('precision', 2)
+print(nyc.Temperature.describe())
+# count    124.00
+# mean      37.60
+# std        4.54
+# min       26.10
+# 25%       34.58
+# 50%       37.60
+# 75%       40.60
+# max       47.60
+# Name: Temperature, dtype: float64
+
+
+linear_regression = stats.linregress(x=nyc.Date, y=nyc.Temperature)
+
+print(linear_regression.slope)
+# 0.01477136113296616
+
+print(linear_regression.intercept)
+# 8.694993233674293
+
+
+#predict for 2019
+print( linear_regression.slope * 2019 + linear_regression.intercept )
+# 38.51837136113297
+
+#predict for 1890
+print( linear_regression.slope * 1890 + linear_regression.intercept )
+# 36.612865774980335
+
+
+plt.cla()
+plt.clf()
+
+sns.set_style('whitegrid')
+
+axes = sns.regplot(x=nyc.Date, y=nyc.Temperature)
+
+axes.set_ylim(10,70)
+
+
+plt.show()
+
+# ----------------------------------------------------
+# Namespaces and Scopes
+# ----------------------------------------------------
+
+# ----------------------------------------------------
+# Unit Testing with Docstrings and doctest
+# https://docs.python.org/3/library/doctest.html
+# ----------------------------------------------------
+
+
+# ----------------------------------------------------
+# Python 3.7 New Data Classes
+# https://docs.python.org/3/library/dataclasses.html
+#
+# https://docs.python.org/3/library/typing.html
+#
+# ----------------------------------------------------
+
+# c1 = Card(Card.FACES[0], Card.SUITS[3])
+
+# print(c1)
+# # Ace of Spades
+
+# print(c1.image_name)
+# # Ace_of_Spades.png
+
+# c2 = Card(Card.FACES[0], Card.SUITS[3])
+# c3 = Card(Card.FACES[0], Card.SUITS[0])
+
+# print(c1 == c2)
+# # True
+
+# print(c1 == c3)
+# # False
+
+# print(c1 != c3)
+# # True
 
 # ----------------------------------------------------
 # Named Tuples
+# https://docs.python.org/3/library/collections.html#collections.namedtuple
 # ----------------------------------------------------
 
+# Card = namedtuple('Card', ['face', 'suit'])
 
+# card = Card(face='Ace', suit='Spades')
+
+# print( card.face )
+# # Ace
+
+# print( card.suit )
+# # Spades
+
+# print(card)
+# # Card(face='Ace', suit='Spades')
+
+# values = ['Queen', 'Hearts']
+
+# card = Card._make(values)
+
+# print(card)
+# # Card(face='Queen', suit='Hearts')
+
+# print(card._asdict())
+# # {'face': 'Queen', 'suit': 'Hearts'}
 
 
 # ----------------------------------------------------
